@@ -1,0 +1,46 @@
+name: Build relationship Skill starter pack
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '01-❤️-把机养成恋人_Make-AI-a-Lover/downloads/relationship-runtime-starter-v1.0/**'
+      - '.github/workflows/build-relationship-skill-pack.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='01-❤️-把机养成恋人_Make-AI-a-Lover/downloads/relationship-runtime-starter-v1.0'
+          OUT='01-❤️-把机养成恋人_Make-AI-a-Lover/downloads/长期关系Skill-懒人包-v1.0.zip'
+          rm -rf /tmp/relationship-runtime-starter
+          cp -R "$SRC" /tmp/relationship-runtime-starter
+          rm -f "$OUT"
+          (cd /tmp && zip -qr "$GITHUB_WORKSPACE/$OUT" relationship-runtime-starter)
+          unzip -t "$OUT"
+
+      - name: Commit rebuilt ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT='01-❤️-把机养成恋人_Make-AI-a-Lover/downloads/长期关系Skill-懒人包-v1.0.zip'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$OUT"
+          if git diff --cached --quiet; then
+            echo 'ZIP is already up to date.'
+            exit 0
+          fi
+          git commit -m 'Rebuild long-term relationship Skill starter ZIP'
+          git push
